@@ -1,11 +1,11 @@
 package com.galapea.techblog.bookinventory.service;
 
 import com.galapea.techblog.bookinventory.domain.Book;
+import com.galapea.techblog.bookinventory.domain.BookAIReply;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,6 +16,11 @@ import java.util.UUID;
 public class BookService {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private final ConcurrentHashMap<String, Book> bookStore = new ConcurrentHashMap<>();
+    private final BookAssistant bookAssistant;
+
+    public BookService(BookAssistant bookAssistant) {
+        this.bookAssistant = bookAssistant;
+    }
 
     public void createBook(Book book) {
         String id = book.id();
@@ -63,7 +68,11 @@ public class BookService {
             throw new IllegalArgumentException("Book with ID " + bookId + " does not exist.");
         }
 
-        String summary = "[TEST] Summary for '" + book.title() + "' by " + book.authors();
+        BookAIReply reply = bookAssistant.findBookSummary(book.title(), book.authors());
+        String summary = reply.value();
+        if (summary == null || summary.isEmpty()) {
+            throw new IllegalArgumentException("Failed to generate summary for book with ID " + bookId);
+        }
         Book updated = new Book(book.id(), book.title(), book.authors(), book.publisher(), book.rating(), book.genres(),
                 summary, book.goodreadsBookId());
         bookStore.put(bookId, updated);
@@ -75,15 +84,11 @@ public class BookService {
             throw new IllegalArgumentException("Book with ID " + bookId + " does not exist.");
         }
 
-        String genres = "[TEST] Genre for '" + book.title() + "' by " + book.authors();
+        BookAIReply reply = bookAssistant.findBookGenre(book.title(), book.authors());
+        String genres = reply.value();
         Book updated = new Book(book.id(), book.title(), book.authors(), book.publisher(), book.rating(), genres,
                 book.summary(), book.goodreadsBookId());
         bookStore.put(bookId, updated);
-        try {
-            Thread.sleep(Duration.ofSeconds(15).toMillis());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         log.info("Fetched genre for book with ID {}: {}", bookId, genres);
     }
 
@@ -93,6 +98,19 @@ public class BookService {
         try {
             onProgress.accept(0.5);
             fetchGenre(bookId);
+            onProgress.accept(1.0);
+            onComplete.accept(bookId);
+        } catch (Exception e) {
+            onError.accept(e);
+        }
+    }
+
+    @Async
+    public void asyncGenerateSummary(String bookId, Consumer<String> onComplete, Consumer<Double> onProgress,
+            Consumer<Exception> onError) {
+        try {
+            onProgress.accept(0.5);
+            generateSummary(bookId);
             onProgress.accept(1.0);
             onComplete.accept(bookId);
         } catch (Exception e) {

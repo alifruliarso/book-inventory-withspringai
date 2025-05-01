@@ -3,6 +3,7 @@ package com.galapea.techblog.bookinventory.service;
 import com.galapea.techblog.bookinventory.domain.Book;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.util.List;
 
@@ -10,10 +11,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BookServiceIntegrationTest {
     private BookService bookService;
+    private BookAssistant bookAssistant;
 
     @BeforeEach
     void setUp() {
-        bookService = new BookService();
+        bookAssistant = Mockito.mock(BookAssistant.class);
+        bookService = new BookService(bookAssistant);
     }
 
     @Test

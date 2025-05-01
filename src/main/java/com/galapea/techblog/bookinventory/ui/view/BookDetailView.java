@@ -28,6 +28,7 @@ public class BookDetailView extends VerticalLayout implements HasUrlParameter<St
     private Button fetchGenreBtn;
     private ProgressBar progressBar;
     private NativeLabel progresLabel;
+    private Button fetchSummaryBtn;
 
     public BookDetailView(BookService bookService) {
         this.bookService = bookService;
@@ -61,7 +62,23 @@ public class BookDetailView extends VerticalLayout implements HasUrlParameter<St
                     ui.accessLater(progressBar::setValue, null), ui.accessLater(this::onJobFailed, null));
         });
         fetchGenreBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        fetchGenreBtn.getStyle().set("cursor", "pointer");
         add(fetchGenreBtn);
+        fetchSummaryBtn = new Button("Update Summary by AI");
+        fetchSummaryBtn.setDisableOnClick(true);
+        fetchSummaryBtn.addClickListener(e -> {
+            var ui = UI.getCurrent();
+            Book book = getCurrentBook();
+            progresLabel.setVisible(true);
+            progresLabel.setText("Asking AI for " + book.title() + "...");
+            progressBar.setVisible(true);
+            progressBar.setIndeterminate(true);
+            bookService.asyncGenerateSummary(book.id(), ui.accessLater(this::onJobCompleted, null),
+                    ui.accessLater(progressBar::setValue, null), ui.accessLater(this::onJobFailed, null));
+        });
+        fetchSummaryBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        fetchSummaryBtn.getStyle().set("cursor", "pointer");
+        add(fetchSummaryBtn);
     }
 
     private void onJobCompleted(String result) {

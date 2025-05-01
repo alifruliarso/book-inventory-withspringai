@@ -79,28 +79,13 @@ public class BookListView extends Main {
             Anchor anchor = new Anchor("/book-detail/" + book.id(), book.title());
             anchor.getStyle().set("cursor", "pointer");
             return anchor;
-        }).setHeader("Title").setAutoWidth(false).setFlexGrow(0).setWidth("400px");
+        }).setHeader("Title").setAutoWidth(false).setFlexGrow(0).setWidth("500px").setFrozen(true);
 
         bookGrid.addColumn(Book::authors).setHeader("Authors").setAutoWidth(false).setFlexGrow(1).setWidth("200px");
-        bookGrid.addColumn(Book::publisher).setHeader("Publisher").setAutoWidth(false).setFlexGrow(1).setWidth("200px");
+        bookGrid.addColumn(Book::publisher).setHeader("Publisher").setAutoWidth(false).setFlexGrow(1).setWidth("250px");
         bookGrid.addColumn(Book::rating).setHeader("Rating").setTextAlign(ColumnTextAlign.END);
         bookGrid.addColumn(Book::genres).setHeader("Genres").setAutoWidth(false).setFlexGrow(1).setWidth("200px");
-        bookGrid.addColumn(Book::summary).setHeader("Summary").setAutoWidth(true).setFlexGrow(1).setWidth("300px");
-        // bookGrid.addComponentColumn(book -> {
-        // if (book.summary() == null || book.summary().isEmpty()) {
-        // Button generateSummaryBtn = new Button("Generate Summary", e -> {
-        // generateBookSummary(book);
-        // Notification
-        // .show("Generating summary for book: " + book.title(), 3000,
-        // Notification.Position.BOTTOM_END)
-        // .addThemeVariants(NotificationVariant.LUMO_PRIMARY);
-        // });
-        // generateSummaryBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        // return generateSummaryBtn;
-        // } else {
-        // return new TextField(null, book.summary(), "Summary");
-        // }
-        // }).setHeader("Summary").setAutoWidth(true).setFlexGrow(1).setWidth("300px");
+        bookGrid.addColumn(Book::summary).setHeader("Summary").setAutoWidth(false).setFlexGrow(1).setWidth("400px");
 
         bookGrid.addColumn(Book::goodreadsBookId).setHeader("Goodreads ID").setAutoWidth(false);
 
