@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestClient;
+import com.galapea.techblog.base.griddb.acquisition.AcquireRowsRequest;
+import com.galapea.techblog.base.griddb.acquisition.AcquireRowsResponse;
 
 public class GridDbCloudClient {
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -37,6 +39,18 @@ public class GridDbCloudClient {
                     }
                     return response;
                 }).build();
+        checkConnection();
+    }
+
+    private void checkConnection() {
+        try {
+            log.info("Checking connection to GridDBCloud...");
+            restClient.get().uri("/checkConnection").retrieve().toBodilessEntity();
+            log.info("Connection to GridDBCloud is successful.");
+        } catch (Exception e) {
+            throw new GridDbException("Failed to connect to GridDBCloud", HttpStatusCode.valueOf(500), e.getMessage(),
+                    e);
+        }
     }
 
     public void createContainer(GridDbContainerDefinition containerDefinition) {
@@ -85,6 +99,33 @@ public class GridDbCloudClient {
             throw e;
         } catch (Exception e) {
             throw new GridDbException("Failed to execute PUT request", HttpStatusCode.valueOf(500), e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Retrieves rows from a specified GridDB container using the provided request body.
+     * <p>
+     * This method sends a POST request to the GridDB Cloud API to fetch rows from the given container
+     * according to the parameters specified in the {@link AcquireRowsRequest}. The response is mapped
+     * to an {@link AcquireRowsResponse} object containing the columns, rows, and pagination information.
+     * </p>
+     * For more details, refer to the <a href="https://www.toshiba-sol.co.jp/en/pro/griddb/docs-en/v5_7/GridDB_Web_API_Reference.html#row-acquisition-from-a-single-container">GridDB Web API Reference</a>
+     *
+     * @param containerName the name of the GridDB container to query
+     * @param requestBody   the request parameters for acquiring rows (offset, limit, condition, sort, etc.)
+     * @return an {@link AcquireRowsResponse} containing the result set from the container
+     * @throws GridDbException if the request fails or the GridDB API returns an error
+     */
+    public AcquireRowsResponse acquireRows(String containerName, AcquireRowsRequest requestBody) {
+        try {
+            ResponseEntity<AcquireRowsResponse> responseEntity = restClient.post()
+                    .uri("/containers/" + containerName + "/rows").body(requestBody).retrieve()
+                    .toEntity(AcquireRowsResponse.class);
+            return responseEntity.getBody();
+        } catch (GridDbException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new GridDbException("Failed to execute GET request", HttpStatusCode.valueOf(500), e.getMessage(), e);
         }
     }
 }

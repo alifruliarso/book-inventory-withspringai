@@ -80,6 +80,12 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+			<groupId>com.github.f4b6a3</groupId>
+			<artifactId>tsid-creator</artifactId>
+			<version>5.2.5</version>
+		</dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

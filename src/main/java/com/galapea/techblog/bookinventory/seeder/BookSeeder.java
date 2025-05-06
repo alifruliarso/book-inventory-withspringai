@@ -23,9 +23,14 @@ public class BookSeeder implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         bookService.createTableBooks();
-        InputStream is = getClass().getClassLoader().getResourceAsStream("goodreads-datasets-book1-100k.csv");
-        List<Book> books = new GoodReadBookCSVParser().parseBooksFromCsv(is);
-        saveBooks(books);
+        if (bookService.listBooks().isEmpty()) {
+            log.info("Seeding books...");
+            InputStream is = getClass().getClassLoader().getResourceAsStream("goodreads-datasets-book1-100k.csv");
+            List<Book> parsedBooks = new GoodReadBookCSVParser().parseBooksFromCsv(is);
+            saveBooks(parsedBooks);
+        } else {
+            log.info("Books already seeded.");
+        }
     }
 
     private void saveBooks(List<Book> books) {

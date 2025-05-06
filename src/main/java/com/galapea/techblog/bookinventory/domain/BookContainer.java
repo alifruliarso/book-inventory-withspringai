@@ -14,6 +14,8 @@ import com.galapea.techblog.base.griddb.GridDbCloudSQLInsert;
 import com.galapea.techblog.base.griddb.GridDbColumn;
 import com.galapea.techblog.base.griddb.GridDbContainerDefinition;
 import com.galapea.techblog.base.griddb.GridDbException;
+import com.galapea.techblog.base.griddb.acquisition.AcquireRowsRequest;
+import com.galapea.techblog.base.griddb.acquisition.AcquireRowsResponse;
 
 @Service
 public class BookContainer {
@@ -126,9 +128,47 @@ public class BookContainer {
         this.gridDbCloudClient.registerRows(BOOKS_TBL_NAME, result);
     }
 
-    private static String removeLastCharOptional(String s) {
-        return Optional.ofNullable(s).filter(str -> str.length() != 0).map(str -> str.substring(0, str.length() - 1))
-                .orElse(s);
+    public List<Book> getBooks() {
+        AcquireRowsRequest requestBody = AcquireRowsRequest.builder().limit(50L).build();
+        AcquireRowsResponse response = this.gridDbCloudClient.acquireRows(BOOKS_TBL_NAME, requestBody);
+        if (response == null || response.getRows() == null) {
+            log.error("Failed to acquire rows from GridDB");
+            return List.of();
+        }
+        List<Book> books = convertResponseToBook(response);
+        log.info("Fetched {} books from GridDB", books.size());
+        return books;
+    }
+
+    public Book getBook(String bookId) {
+        AcquireRowsRequest requestBody = AcquireRowsRequest.builder().limit(1L).condition("id == \'" + bookId + "\'")
+                .build();
+        AcquireRowsResponse response = this.gridDbCloudClient.acquireRows(BOOKS_TBL_NAME, requestBody);
+        if (response == null || response.getRows() == null) {
+            log.error("Failed to acquire rows from GridDB");
+            return null;
+        }
+        List<Book> books = convertResponseToBook(response);
+        log.info("Fetched {} books from GridDB", books.size());
+        return books.stream().filter(b -> b.id().equals(bookId)).findFirst().orElse(null);
+    }
+
+    private List<Book> convertResponseToBook(AcquireRowsResponse response) {
+        List<Book> books = response.getRows().stream().map(row -> {
+            try {
+                var book = new Book(row.get(0).toString(), row.get(1).toString(), row.get(2).toString(),
+                        row.get(3).toString(),
+                        Optional.ofNullable(row.get(4)).map(Object::toString).map(Double::valueOf).orElse(null),
+                        Optional.ofNullable(row.get(5)).map(Object::toString).orElse(null),
+                        Optional.ofNullable(row.get(6)).map(Object::toString).orElse(null),
+                        Optional.ofNullable(row.get(7)).map(Object::toString).map(Long::valueOf).orElse(null));
+                return book;
+            } catch (Exception e) {
+                log.error("Error parsing book row: {}. Error: {}", row.toString(), e.getMessage());
+                return null;
+            }
+        }).filter(book -> book != null).toList();
+        return books;
     }
 
 }

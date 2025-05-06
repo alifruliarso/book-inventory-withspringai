@@ -3,16 +3,15 @@ package com.galapea.techblog.bookinventory.service;
 import com.galapea.techblog.bookinventory.domain.Book;
 import com.galapea.techblog.bookinventory.domain.BookAIReply;
 import com.galapea.techblog.bookinventory.domain.BookContainer;
+import com.github.f4b6a3.tsid.TsidCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.UUID;
 
 @Service
 public class BookService {
@@ -29,7 +28,7 @@ public class BookService {
     public void createBook(Book book) {
         String id = book.id();
         if (id == null || id.isEmpty()) {
-            id = UUID.randomUUID().toString();
+            id = nextId();
             book = new Book(id, book.title(), book.authors(), book.publisher(), book.rating(), book.genres(),
                     book.summary(), book.goodreadsBookId());
         }
@@ -41,11 +40,11 @@ public class BookService {
     }
 
     public List<Book> listBooks() {
-        return new ArrayList<>(bookStore.values());
+        return this.bookContainer.getBooks();
     }
 
     public Book getBook(String id) {
-        Book book = bookStore.get(id);
+        Book book = this.bookContainer.getBook(id);
         if (book == null) {
             throw new IllegalArgumentException("Book with ID " + id + " does not exist.");
         }
@@ -129,10 +128,14 @@ public class BookService {
 
     public void saveBooks(List<Book> books) {
         List<Book> newBooks = books.stream().map(book -> {
-            String id = (book.id() != null) ? book.id() : UUID.randomUUID().toString();
+            String id = (book.id() != null) ? book.id() : nextId();
             return new Book(id, book.title(), book.authors(), book.publisher(), book.rating(), book.genres(),
                     book.summary(), book.goodreadsBookId());
         }).collect(Collectors.toList());
         this.bookContainer.saveBooks(newBooks);
+    }
+
+    public static String nextId() {
+        return "book_" + TsidCreator.getTsid().format("%S");
     }
 }

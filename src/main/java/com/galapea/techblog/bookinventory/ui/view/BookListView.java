@@ -31,6 +31,7 @@ public class BookListView extends Main {
         this.bookService = bookService;
         bookGrid = new Grid<>(Book.class, false);
         bookGrid.setItems(bookService.listBooks());
+        bookGrid.setEmptyStateText("No books found");
         bookGrid.setSizeFull();
 
         TextField titleFieldNew = new TextField();
