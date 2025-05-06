@@ -1,6 +1,7 @@
 package com.galapea.techblog.bookinventory.service;
 
 import com.galapea.techblog.bookinventory.domain.Book;
+import com.galapea.techblog.bookinventory.domain.BookContainer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -12,11 +13,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class BookServiceIntegrationTest {
     private BookService bookService;
     private BookAssistant bookAssistant;
+    private BookContainer bookContainer;
 
     @BeforeEach
     void setUp() {
         bookAssistant = Mockito.mock(BookAssistant.class);
-        bookService = new BookService(bookAssistant);
+        bookContainer = Mockito.mock(BookContainer.class);
+        bookService = new BookService(bookAssistant, bookContainer);
     }
 
     @Test

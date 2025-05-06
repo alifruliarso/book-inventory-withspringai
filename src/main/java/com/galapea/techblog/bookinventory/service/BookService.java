@@ -2,6 +2,7 @@ package com.galapea.techblog.bookinventory.service;
 
 import com.galapea.techblog.bookinventory.domain.Book;
 import com.galapea.techblog.bookinventory.domain.BookAIReply;
+import com.galapea.techblog.bookinventory.domain.BookContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.UUID;
 
 @Service
@@ -17,9 +19,11 @@ public class BookService {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private final ConcurrentHashMap<String, Book> bookStore = new ConcurrentHashMap<>();
     private final BookAssistant bookAssistant;
+    private final BookContainer bookContainer;
 
-    public BookService(BookAssistant bookAssistant) {
+    public BookService(BookAssistant bookAssistant, BookContainer bookContainer) {
         this.bookAssistant = bookAssistant;
+        this.bookContainer = bookContainer;
     }
 
     public void createBook(Book book) {
@@ -33,6 +37,7 @@ public class BookService {
             throw new IllegalArgumentException("Book with ID " + id + " already exists.");
         }
         bookStore.put(id, book);
+        bookContainer.insert(book);
     }
 
     public List<Book> listBooks() {
@@ -78,7 +83,7 @@ public class BookService {
         bookStore.put(bookId, updated);
     }
 
-    public void fetchGenre(String bookId) {
+    public void generateGenre(String bookId) {
         Book book = bookStore.get(bookId);
         if (book == null) {
             throw new IllegalArgumentException("Book with ID " + bookId + " does not exist.");
@@ -93,11 +98,11 @@ public class BookService {
     }
 
     @Async
-    public void asyncFetchGenre(String bookId, Consumer<String> onComplete, Consumer<Double> onProgress,
+    public void asyncGenerateGenre(String bookId, Consumer<String> onComplete, Consumer<Double> onProgress,
             Consumer<Exception> onError) {
         try {
             onProgress.accept(0.5);
-            fetchGenre(bookId);
+            generateGenre(bookId);
             onProgress.accept(1.0);
             onComplete.accept(bookId);
         } catch (Exception e) {
@@ -116,5 +121,18 @@ public class BookService {
         } catch (Exception e) {
             onError.accept(e);
         }
+    }
+
+    public void createTableBooks() {
+        this.bookContainer.createTableBooks();
+    }
+
+    public void saveBooks(List<Book> books) {
+        List<Book> newBooks = books.stream().map(book -> {
+            String id = (book.id() != null) ? book.id() : UUID.randomUUID().toString();
+            return new Book(id, book.title(), book.authors(), book.publisher(), book.rating(), book.genres(),
+                    book.summary(), book.goodreadsBookId());
+        }).collect(Collectors.toList());
+        this.bookContainer.saveBooks(newBooks);
     }
 }

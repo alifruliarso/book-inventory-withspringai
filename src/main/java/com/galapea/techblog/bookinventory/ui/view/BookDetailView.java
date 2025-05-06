@@ -58,7 +58,7 @@ public class BookDetailView extends VerticalLayout implements HasUrlParameter<St
             progresLabel.setText("Asking AI for " + book.title() + "...");
             progressBar.setVisible(true);
             progressBar.setIndeterminate(true);
-            bookService.asyncFetchGenre(book.id(), ui.accessLater(this::onJobCompleted, null),
+            bookService.asyncGenerateGenre(book.id(), ui.accessLater(this::onJobCompleted, null),
                     ui.accessLater(progressBar::setValue, null), ui.accessLater(this::onJobFailed, null));
         });
         fetchGenreBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);

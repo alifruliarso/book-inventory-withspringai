@@ -2,6 +2,7 @@ package com.galapea.techblog.bookinventory.seeder;
 
 import java.io.InputStream;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,7 @@ public class BookSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        bookService.createTableBooks();
         InputStream is = getClass().getClassLoader().getResourceAsStream("goodreads-datasets-book1-100k.csv");
         List<Book> books = new GoodReadBookCSVParser().parseBooksFromCsv(is);
         saveBooks(books);
@@ -29,19 +31,27 @@ public class BookSeeder implements CommandLineRunner {
     private void saveBooks(List<Book> books) {
         int count = 0;
         Instant start = Instant.now();
-        for (Book book : books) {
+
+        List<List<Book>> chunks = splitIntoChunks(books, 10);
+        for (List<Book> chunk : chunks) {
+            count += chunk.size();
             try {
-                bookService.createBook(book);
+                bookService.saveBooks(chunk);
             } catch (Exception e) {
-                log.warn("Failed to create book with goodreadsBookId {}: {}", book.goodreadsBookId(), e.getMessage());
-            }
-            count++;
-            if (count % 500 == 0) {
-                log.info("Seeded {} books...", count);
+                log.warn("Failed to save chunk of books: {}", e.getMessage());
             }
         }
         Instant end = Instant.now();
         log.info("Seeding completed in {} seconds", (end.toEpochMilli() - start.toEpochMilli()) / 1000.0);
         log.info("Seeding completed. Total books seeded: {}", count);
+    }
+
+    public static <T> List<List<T>> splitIntoChunks(List<T> list, int chunkSize) {
+        List<List<T>> chunks = new ArrayList<>();
+        for (int i = 0; i < list.size(); i += chunkSize) {
+            int end = Math.min(list.size(), i + chunkSize);
+            chunks.add(list.subList(i, end));
+        }
+        return chunks;
     }
 }
