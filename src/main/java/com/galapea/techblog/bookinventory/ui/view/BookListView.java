@@ -1,5 +1,6 @@
 package com.galapea.techblog.bookinventory.ui.view;
 
+import java.util.List;
 import com.galapea.techblog.base.ui.component.ViewToolbar;
 import com.galapea.techblog.bookinventory.domain.Book;
 import com.galapea.techblog.bookinventory.service.BookService;
@@ -54,7 +55,7 @@ public class BookListView extends Main {
                         titleFieldNew.getValue(), authorsFieldNew.getValue(), publisherFieldNew.getValue(),
                         ratingFieldNew.getValue(), genresFieldNew.getValue(), summaryFieldNew.getValue(),
                         goodreadsIdFieldNew.getValue() != null ? goodreadsIdFieldNew.getValue().longValue() : null);
-                bookService.createBook(newBook);
+                bookService.saveBooks(List.of(newBook));
                 bookGrid.setItems(bookService.listBooks());
                 titleFieldNew.clear();
                 authorsFieldNew.clear();
@@ -87,7 +88,8 @@ public class BookListView extends Main {
         bookGrid.addColumn(Book::rating).setHeader("Rating").setTextAlign(ColumnTextAlign.END);
         bookGrid.addColumn(Book::genres).setHeader("Genres").setAutoWidth(false).setFlexGrow(1).setWidth("200px");
         bookGrid.addColumn(Book::summary).setHeader("Summary").setAutoWidth(false).setFlexGrow(1).setWidth("400px");
-
+        bookGrid.addColumn(Book::goodreadsUrl).setHeader("Source URL").setAutoWidth(false).setFlexGrow(1)
+                .setWidth("250px");
         bookGrid.addColumn(Book::goodreadsBookId).setHeader("Goodreads ID").setAutoWidth(false);
 
         setSizeFull();

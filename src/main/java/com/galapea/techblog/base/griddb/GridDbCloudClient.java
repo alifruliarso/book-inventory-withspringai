@@ -103,18 +103,28 @@ public class GridDbCloudClient {
     }
 
     /**
-     * Retrieves rows from a specified GridDB container using the provided request body.
+     * Retrieves rows from a specified GridDB container using the provided request
+     * body.
      * <p>
-     * This method sends a POST request to the GridDB Cloud API to fetch rows from the given container
-     * according to the parameters specified in the {@link AcquireRowsRequest}. The response is mapped
-     * to an {@link AcquireRowsResponse} object containing the columns, rows, and pagination information.
+     * This method sends a POST request to the GridDB Cloud API to fetch rows from
+     * the given container according to the parameters specified in the
+     * {@link AcquireRowsRequest}. The response is mapped to an
+     * {@link AcquireRowsResponse} object containing the columns, rows, and
+     * pagination information.
      * </p>
-     * For more details, refer to the <a href="https://www.toshiba-sol.co.jp/en/pro/griddb/docs-en/v5_7/GridDB_Web_API_Reference.html#row-acquisition-from-a-single-container">GridDB Web API Reference</a>
+     * For more details, refer to the <a href=
+     * "https://www.toshiba-sol.co.jp/en/pro/griddb/docs-en/v5_7/GridDB_Web_API_Reference.html#row-acquisition-from-a-single-container">GridDB
+     * Web API Reference</a>
      *
-     * @param containerName the name of the GridDB container to query
-     * @param requestBody   the request parameters for acquiring rows (offset, limit, condition, sort, etc.)
-     * @return an {@link AcquireRowsResponse} containing the result set from the container
-     * @throws GridDbException if the request fails or the GridDB API returns an error
+     * @param containerName
+     *            the name of the GridDB container to query
+     * @param requestBody
+     *            the request parameters for acquiring rows (offset, limit,
+     *            condition, sort, etc.)
+     * @return an {@link AcquireRowsResponse} containing the result set from the
+     *         container
+     * @throws GridDbException
+     *             if the request fails or the GridDB API returns an error
      */
     public AcquireRowsResponse acquireRows(String containerName, AcquireRowsRequest requestBody) {
         try {

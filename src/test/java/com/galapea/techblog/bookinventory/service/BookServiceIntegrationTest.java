@@ -5,10 +5,12 @@ import com.galapea.techblog.bookinventory.domain.BookContainer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.mockito.ArgumentCaptor;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class BookServiceIntegrationTest {
     private BookService bookService;
@@ -23,39 +25,25 @@ class BookServiceIntegrationTest {
     }
 
     @Test
-    void testCreateAndListBooks() {
-        Book book = new Book("1", "Title", "Author", "Publisher", 4.5, "Genre", "Summary", 123L);
-        bookService.createBook(book);
-        List<Book> books = bookService.listBooks();
-        assertEquals(1, books.size());
-        assertEquals(book, books.get(0));
-    }
-
-    @Test
-    void testCreateBookWithDuplicateIdThrowsException() {
-        Book book = new Book("1", "Title", "Author", "Publisher", 4.5, "Genre", "Summary", 123L);
-        bookService.createBook(book);
-        Book duplicate = new Book("1", "Another Title", "Another Author", "Another Publisher", 3.0, "Another Genre",
-                "Another Summary", 456L);
-        assertThrows(IllegalArgumentException.class, () -> bookService.createBook(duplicate));
-    }
-
-    @Test
-    void testUpdateBook() {
-        Book book = new Book("1", "Title", "Author", "Publisher", 4.5, "Genre", "Summary", 123L);
-        bookService.createBook(book);
-        Book updated = new Book("1", "Updated Title", "Updated Author", "Updated Publisher", 5.0, "Updated Genre",
-                "Updated Summary", 789L);
-        bookService.updateBook("1", updated);
-        List<Book> books = bookService.listBooks();
-        assertEquals(1, books.size());
-        assertEquals(updated, books.get(0));
-    }
-
-    @Test
-    void testUpdateNonExistentBookThrowsException() {
-        Book updated = new Book("2", "Updated Title", "Updated Author", "Updated Publisher", 5.0, "Updated Genre",
-                "Updated Summary", 789L);
-        assertThrows(IllegalArgumentException.class, () -> bookService.updateBook("2", updated));
+    void testSaveBooksCallsBookContainerWithCorrectData() {
+        BookContainer mockBookContainer = mock(BookContainer.class);
+        BookAssistant mockBookAssistant = mock(BookAssistant.class);
+        BookService bookService = new BookService(mockBookAssistant, mockBookContainer);
+        String bookId = "bookIDXXJXJXJ";
+        List<Book> books = List.of(new Book(null, "Title1", "Author1", "Publisher1", 4.5, "Genre1", "Summary1", 123L),
+                new Book(bookId, "Title2", "Author2", "Publisher2", 3.2, "Genre2", "Summary2", 456L));
+        bookService.saveBooks(books);
+        @SuppressWarnings("unchecked")
+        final ArgumentCaptor<List<Book>> bookListArgumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(mockBookContainer, times(1)).saveBooks(bookListArgumentCaptor.capture());
+        List<Book> insertedBooks = bookListArgumentCaptor.getAllValues().get(0);
+        assertEquals(2, insertedBooks.size());
+        for (Book b : insertedBooks) {
+            assertNotNull(b.id());
+            assertTrue(b.id().length() > 0);
+        }
+        assertEquals("Title1", insertedBooks.get(0).title());
+        assertEquals("Title2", insertedBooks.get(1).title());
+        assertEquals(bookId, insertedBooks.get(1).id());
     }
 }

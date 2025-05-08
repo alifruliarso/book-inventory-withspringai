@@ -25,7 +25,7 @@ public class BookService {
         this.bookContainer = bookContainer;
     }
 
-    public void createBook(Book book) {
+    private void createBook(Book book) {
         String id = book.id();
         if (id == null || id.isEmpty()) {
             id = nextId();
@@ -36,7 +36,6 @@ public class BookService {
             throw new IllegalArgumentException("Book with ID " + id + " already exists.");
         }
         bookStore.put(id, book);
-        bookContainer.insert(book);
     }
 
     public List<Book> listBooks() {
@@ -51,14 +50,14 @@ public class BookService {
         return book;
     }
 
-    public void updateBook(String id, Book updatedBook) {
+    private void updateBook(String id, Book updatedBook) {
         if (!bookStore.containsKey(id)) {
             throw new IllegalArgumentException("Book with ID " + id + " does not exist.");
         }
         bookStore.put(id, updatedBook);
     }
 
-    public void updateBookSummary(String id, String summary) {
+    private void updateBookSummary(String id, String summary) {
         Book book = bookStore.get(id);
         if (book == null) {
             throw new IllegalArgumentException("Book with ID " + id + " does not exist.");
@@ -67,7 +66,7 @@ public class BookService {
     }
 
     public void generateSummary(String bookId) {
-        Book book = bookStore.get(bookId);
+        Book book = getBook(bookId);
         if (book == null) {
             throw new IllegalArgumentException("Book with ID " + bookId + " does not exist.");
         }
@@ -78,22 +77,22 @@ public class BookService {
             throw new IllegalArgumentException("Failed to generate summary for book with ID " + bookId);
         }
         Book updated = new Book(book.id(), book.title(), book.authors(), book.publisher(), book.rating(), book.genres(),
-                summary, book.goodreadsBookId());
-        bookStore.put(bookId, updated);
+                summary, book.goodreadsBookId(), reply.sourceUrl());
+        saveBooks(List.of(updated));
     }
 
     public void generateGenre(String bookId) {
-        Book book = bookStore.get(bookId);
+        Book book = getBook(bookId);
         if (book == null) {
             throw new IllegalArgumentException("Book with ID " + bookId + " does not exist.");
         }
 
         BookAIReply reply = bookAssistant.findBookGenre(book.title(), book.authors());
         String genres = reply.value();
-        Book updated = new Book(book.id(), book.title(), book.authors(), book.publisher(), book.rating(), genres,
-                book.summary(), book.goodreadsBookId());
-        bookStore.put(bookId, updated);
         log.info("Fetched genre for book with ID {}: {}", bookId, genres);
+        Book updated = new Book(book.id(), book.title(), book.authors(), book.publisher(), book.rating(), genres,
+                book.summary(), book.goodreadsBookId(), book.goodreadsUrl());
+        saveBooks(List.of(updated));
     }
 
     @Async
@@ -127,10 +126,14 @@ public class BookService {
     }
 
     public void saveBooks(List<Book> books) {
+        if (books == null || books.isEmpty()) {
+            log.warn("No books to save.");
+            return;
+        }
         List<Book> newBooks = books.stream().map(book -> {
             String id = (book.id() != null) ? book.id() : nextId();
             return new Book(id, book.title(), book.authors(), book.publisher(), book.rating(), book.genres(),
-                    book.summary(), book.goodreadsBookId());
+                    book.summary(), book.goodreadsBookId(), book.goodreadsUrl());
         }).collect(Collectors.toList());
         this.bookContainer.saveBooks(newBooks);
     }

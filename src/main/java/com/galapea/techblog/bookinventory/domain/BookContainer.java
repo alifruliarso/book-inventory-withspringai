@@ -50,7 +50,7 @@ public class BookContainer {
                 new GridDbColumn("title", "STRING"), new GridDbColumn("authors", "STRING"),
                 new GridDbColumn("publisher", "STRING"), new GridDbColumn("rating", "DOUBLE"),
                 new GridDbColumn("genres", "STRING"), new GridDbColumn("summary", "STRING"),
-                new GridDbColumn("goodreadsBookId", "LONG"));
+                new GridDbColumn("goodreadsBookId", "LONG"), new GridDbColumn("goodreadsUrl", "STRING"));
 
         GridDbContainerDefinition containerDefinition = GridDbContainerDefinition.createContainer(BOOKS_TBL_NAME,
                 columns);
@@ -116,6 +116,8 @@ public class BookContainer {
             sb.append("\"").append(book.summary() != null ? book.summary() : "").append("\"");
             sb.append(", ");
             sb.append(book.goodreadsBookId()); // Numeric value, no quotes
+            sb.append(", ");
+            sb.append("\"").append(book.goodreadsUrl() != null ? book.goodreadsUrl() : "").append("\"");
             sb.append("]"); // End the inner array
             // Add a comma between books, except for the last one
             if (i < books.size() - 1) {
@@ -161,7 +163,8 @@ public class BookContainer {
                         Optional.ofNullable(row.get(4)).map(Object::toString).map(Double::valueOf).orElse(null),
                         Optional.ofNullable(row.get(5)).map(Object::toString).orElse(null),
                         Optional.ofNullable(row.get(6)).map(Object::toString).orElse(null),
-                        Optional.ofNullable(row.get(7)).map(Object::toString).map(Long::valueOf).orElse(null));
+                        Optional.ofNullable(row.get(7)).map(Object::toString).map(Long::valueOf).orElse(null),
+                        Optional.ofNullable(row.get(8)).map(Object::toString).orElse(null));
                 return book;
             } catch (Exception e) {
                 log.error("Error parsing book row: {}. Error: {}", row.toString(), e.getMessage());

@@ -127,6 +127,7 @@ public class BookDetailView extends VerticalLayout implements HasUrlParameter<St
                     "Goodreads ID");
             content.addFormItem(new Text(book.genres() != null ? book.genres() : "-"), "Genres");
             content.addFormItem(new Text(book.summary() != null ? book.summary() : "-"), "Summary");
+            content.addFormItem(new Text(book.goodreadsUrl() != null ? book.goodreadsUrl() : "-"), "Source URL");
             content.setResponsiveSteps(new ResponsiveStep("0", 1));
         }
     }

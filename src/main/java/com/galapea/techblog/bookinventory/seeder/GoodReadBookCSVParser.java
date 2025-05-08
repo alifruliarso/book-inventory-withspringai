@@ -46,7 +46,7 @@ public class GoodReadBookCSVParser {
                 }
                 Book book = new Book(null, title, authors, publisher, rating, null, null, goodreadsBookId);
                 books.add(book);
-                if (books.size() % 25 == 0) {
+                if (books.size() % 55 == 0) {
                     log.info("Parsed {} books...", books.size());
                     break;
                 }
