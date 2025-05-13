@@ -1,4 +1,4 @@
-# Book Inventory with Spring AI
+# Book Inventory using Vaadin and Spring AI
 
 To start the application in development mode, import it into your IDE and run the `Application` class. 
 You can also start the application from the command line by running: 
@@ -17,13 +17,19 @@ To build the application in production mode, run:
 ./mvnw -Pproduction package
 ```
 
+Start the application from the JAR:
+
+```bash
+java -jar book-inventory-withspringai-1.0-SNAPSHOT.jar
+```
+
 Format code:
 
 ```bash
 ./mvnw spotless:apply
 ```
 
-## Getting Started
+## Vaadin Getting Started Guide
 
 The [Getting Started](https://vaadin.com/docs/latest/getting-started) guide will quickly familiarize you with your new Book Inventory implementation. You'll learn how to set up your development environment, understand the project structure, and find resources to help you add muscles to your skeleton — transforming it into a fully-featured application.
 

@@ -7,6 +7,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
@@ -33,6 +34,14 @@ public final class MainView extends Main {
         titleDiv.addClassNames(LumoUtility.Display.FLEX, LumoUtility.FlexDirection.COLUMN,
                 LumoUtility.JustifyContent.CENTER, LumoUtility.AlignItems.CENTER, LumoUtility.Gap.MEDIUM);
         add(titleDiv);
+        VerticalLayout welcomeTextLayout = new VerticalLayout();
+        // HorizontalLayout welcomeTextLayout = new HorizontalLayout();
+        welcomeTextLayout.addClassNames(LumoUtility.JustifyContent.CENTER, LumoUtility.AlignItems.CENTER,
+                LumoUtility.Gap.MEDIUM, LumoUtility.Background.PRIMARY_10, LumoUtility.TextColor.SUCCESS);
+        welcomeTextLayout.add(new Span("This is a simple application to manage your book collection."));
+        welcomeTextLayout.add(new Span("You can also import books from a CSV file."));
+        welcomeTextLayout.add(new Span("You can also view the details of each book."));
+        add(welcomeTextLayout);
     }
 
     /**

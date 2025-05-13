@@ -8,6 +8,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -127,7 +128,13 @@ public class BookDetailView extends VerticalLayout implements HasUrlParameter<St
                     "Goodreads ID");
             content.addFormItem(new Text(book.genres() != null ? book.genres() : "-"), "Genres");
             content.addFormItem(new Text(book.summary() != null ? book.summary() : "-"), "Summary");
-            content.addFormItem(new Text(book.goodreadsUrl() != null ? book.goodreadsUrl() : "-"), "Source URL");
+            if (book.goodreadsBookId() != null) {
+                Anchor goodreadsLink = new Anchor(book.goodreadsUrl(), book.goodreadsUrl());
+                goodreadsLink.setTarget("_blank");
+                content.addFormItem(goodreadsLink, "Source URL");
+            } else {
+                content.addFormItem(new Text("-"), "Source URL");
+            }
             content.setResponsiveSteps(new ResponsiveStep("0", 1));
         }
     }
