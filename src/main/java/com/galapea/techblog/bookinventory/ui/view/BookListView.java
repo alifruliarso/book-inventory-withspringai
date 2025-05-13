@@ -1,8 +1,11 @@
 package com.galapea.techblog.bookinventory.ui.view;
 
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.galapea.techblog.base.ui.component.ViewToolbar;
 import com.galapea.techblog.bookinventory.domain.Book;
+import com.galapea.techblog.bookinventory.seeder.GoodReadBookCSVParser;
 import com.galapea.techblog.bookinventory.service.BookService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -16,6 +19,8 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -25,6 +30,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 @PageTitle("Book List")
 @Menu(order = 0, icon = "vaadin:book", title = "Book List")
 public class BookListView extends Main {
+    private final Logger log = LoggerFactory.getLogger(getClass());
     private final BookService bookService;
     private final Grid<Book> bookGrid;
 
@@ -96,6 +102,42 @@ public class BookListView extends Main {
         addClassNames(LumoUtility.BoxSizing.BORDER, LumoUtility.Display.FLEX, LumoUtility.FlexDirection.COLUMN,
                 LumoUtility.Padding.MEDIUM, LumoUtility.Gap.SMALL);
         add(new ViewToolbar("Book List"));
+
+        MemoryBuffer fileBuffer = new MemoryBuffer();
+        Upload upload = new Upload(fileBuffer);
+        upload.setAcceptedFileTypes("text/csv");
+        upload.setMaxFileSize(1 * 1024 * 1024); // 1 MB
+        upload.setMaxFiles(1);
+        Button uploadButton = new Button("Upload CSV");
+        uploadButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        upload.setUploadButton(uploadButton);
+        upload.addSucceededListener(event -> {
+            try {
+                log.info("File name: {}", fileBuffer.getFileName());
+                List<Book> parsedBooks = new GoodReadBookCSVParser().parseBooksFromCsv(fileBuffer.getInputStream());
+                bookService.saveBooks(parsedBooks);
+                bookGrid.setItems(bookService.listBooks());
+                Notification.show("Books uploaded", 5000, Notification.Position.BOTTOM_END)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            } catch (Exception e) {
+                Notification.show(e.getMessage(), 5000, Notification.Position.BOTTOM_END)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            }
+        });
+        upload.addFailedListener(event -> {
+            Notification.show("Upload failed", 4000, Notification.Position.BOTTOM_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        });
+        upload.addFileRejectedListener(event -> {
+            Notification.show("File rejected", 4000, Notification.Position.BOTTOM_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        });
+        upload.getElement().addEventListener("max-files-reached-changed", event -> {
+            boolean maxFilesReached = event.getEventData().getBoolean("event.detail.value");
+            uploadButton.setEnabled(!maxFilesReached);
+        }).addEventData("event.detail.value");
+        HorizontalLayout uploadCsvLayout = new HorizontalLayout(upload);
+        add(uploadCsvLayout);
         // add(addBookLayout);
         add(bookGrid);
     }
