@@ -1,5 +1,14 @@
 # Book Inventory using Vaadin and Spring AI
 
+🔧 Implementation Highlights
+
+- Spring AI log HTTP request and response using custom inteceptor
+- Vaadin upload CSV
+- Vaadin progress bar
+- Zero-Shot Prompting
+- Add request interceptor to RestClient
+- Logging RestClient
+
 To start the application in development mode, import it into your IDE and run the `Application` class. 
 You can also start the application from the command line by running: 
 
