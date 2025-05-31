@@ -1,6 +1,13 @@
 # Book Inventory using Vaadin and Spring AI
 
-🔧 Implementation Highlights
+<em>Built with the tools and technologies:</em>
+
+[Vaadin Flow](https://vaadin.com/docs/latest/flow/what-is-flow), Spring Boot, Spring AI, Maven\
+Database: [GridDB Cloud](https://www.global.toshiba/ww/products-solutions/ai-iot/griddb/product/griddb-cloud.html)
+
+---
+
+🔧 <em>Implementation Highlights</em>
 
 - Spring AI log HTTP request and response using custom inteceptor
 - Vaadin upload CSV
@@ -8,6 +15,10 @@
 - Zero-Shot Prompting
 - Add request interceptor to RestClient
 - Logging RestClient
+
+---
+
+## Getting Started
 
 To start the application in development mode, import it into your IDE and run the `Application` class. 
 You can also start the application from the command line by running: 
@@ -38,7 +49,9 @@ Format code:
 ./mvnw spotless:apply
 ```
 
-## Vaadin Getting Started Guide
+---
+
+Vaadin Getting Started Guide
 
 The [Getting Started](https://vaadin.com/docs/latest/getting-started) guide will quickly familiarize you with your new Book Inventory implementation. You'll learn how to set up your development environment, understand the project structure, and find resources to help you add muscles to your skeleton — transforming it into a fully-featured application.
 

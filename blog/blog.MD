@@ -45,6 +45,10 @@ For this project, I selected:
 
     Spring AI is a powerful extension of the [Spring Framework](https://spring.io/projects/spring-framework). It empowers Java developers to craft AI-driven applications with minimal reskilling required. By tapping into the strengths of the Spring Framework, Spring AI opens the door to advanced AI features, simplifying the journey to creating intelligent apps.
 
+- [GridDB Cloud](https://www.global.toshiba/ww/products-solutions/ai-iot/griddb/product/griddb-cloud.html)
+
+    GridDB Cloud is a fully managed, cloud-based database offered by GridDB, designed to store and process massive volumes of time-series data in real-time. Read this [quick start guide](https://griddb.net/en/blog/griddb-cloud-quick-start-guide/) to learn how to use GridDB Cloud. You can sign up for a GridDB Cloud Free instance at this link: https://form.ict-toshiba.jp/download_form_griddb_cloud_freeplan_e.
+
 ## Create a new Vaadin Project
 
 To create a Vaadin Flow project, go to [start.vaadin.com](https://start.vaadin.com/app). This starter project has a basic application with a fully-functional end-to-end workflow. Choose a pure Java option with Vaadin Flow. Click the download button, then unzip and open the project into your favorite IDE.
@@ -156,6 +160,26 @@ public class BookContainer {
 - `GridDbCloudClient`: to communicate with the GridDB Cloud database. Provided automatically by Spring Boot through constructor-based dependency injection. 
 - `BOOKS_TBL_NAME`: table name as a constant.
 - `createTableBooks()`: create a `Books` table (`collection`) in GridDB Cloud database to hold records for our books. This method started by creating a `List` of `GridDBColumn` objects. Each object describes one column with data type. Then create the container definition and use the `GridDbCloudClient` to actually create the table.
+
+```java
+public class GridDbCloudClient {
+    private final RestClient restClient;
+    public GridDbCloudClient(String baseUrl, String authToken) {
+        this.restClient = RestClient.builder().baseUrl(baseUrl).defaultHeader("Authorization", "Basic " + authToken)
+                .defaultHeader("Content-Type", "application/json").defaultHeader("Accept", "application/json")
+                .build();
+    }
+    public void createContainer(GridDbContainerDefinition containerDefinition) {
+        try {
+            restClient.post().uri("/containers").body(containerDefinition).retrieve().toBodilessEntity();
+        } catch (Exception e) {
+            throw new GridDbException("Failed to create container", HttpStatusCode.valueOf(500), e.getMessage(), e);
+        }
+    }
+}
+```
+
+The `GridDbCloudClient` class is a Java client for interacting with the GridDB Cloud Web API. It provides methods for creating containers, registering rows, acquiring rows, and executing POST requests. We set `RestClient` up with a base URL and a basic authorization header so that it could connect to the GridDB Cloud Web API and authenticate.
 
 ```java
 //BookContainer.java
@@ -484,6 +508,10 @@ String sourceUrl = reply.sourceUrl();
 You can find the code for this article on [Github](https://github.com/alifruliarso/book-inventory-withspringai/tree/main) and run the application from the command line with Maven.
 
 ![springai-updatebooksummary.gif](springai-updatebooksummary.gif)
+
+<br>GridDB Cloud query output.
+
+![griddbcloud_booksqueryoutput.png](griddbcloud_booksqueryoutput.png)
 
 ## Summary
 
